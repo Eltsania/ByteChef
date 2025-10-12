@@ -34,11 +34,12 @@
     }
 
     .message {
-      max-width: 70%;
+      max-width: 80%;
       margin: 10px 0;
       padding: 12px 15px;
       border-radius: 15px;
-      line-height: 1.4;
+      line-height: 1.6;
+      white-space: pre-line;
     }
 
     .bot {
@@ -80,6 +81,17 @@
     button:hover {
       background: #e67e22;
     }
+
+    h3 {
+      margin-top: 10px;
+      margin-bottom: 5px;
+      color: #d35400;
+    }
+
+    ul, ol {
+      margin: 5px 0 10px 20px;
+      padding: 0;
+    }
   </style>
 </head>
 <body>
@@ -99,13 +111,50 @@
     const chat = document.getElementById("chat");
     const input = document.getElementById("userInput");
 
-    // ganti URL ini dengan link Web App Google Apps Script kamu
+    // Ganti URL ini dengan link Web App Google Apps Script kamu
     const API_URL = "https://script.google.com/macros/s/AKfycbzMIpqr7e9k6zIpUaC2fjv3Djcwbm9IcjcLbHkDbm122Fvf3YP6xlMteRHuBn_Z-fYK8Q/exec";
+
+    function formatList(text) {
+      if (text.includes("•") || text.includes("|")) {
+        const items = text.split(/•|\|/).map(i => i.trim()).filter(i => i !== "");
+        return "<ul>" + items.map(i => `<li>${i}</li>`).join("") + "</ul>";
+      }
+      if (text.match(/\d\./)) {
+        const steps = text.split(/\d+\.\s*/).map(i => i.trim()).filter(i => i !== "");
+        return "<ol>" + steps.map(i => `<li>${i}</li>`).join("") + "</ol>";
+      }
+      return `<p>${text}</p>`;
+    }
+
+    function formatResep(text) {
+      // Pecah bagian berdasarkan kata kunci umum
+      const namaMatch = text.match(/(?:Resep|Nama):?\s*(.*?)(?=\n|Bahan|Langkah|$)/i);
+      const namaResep = namaMatch ? namaMatch[1].trim() : "";
+
+      const bahanMatch = text.match(/Bahan(?:-bahan)?:?\s*([\s\S]*?)(?=Langkah|$)/i);
+      const bahan = bahanMatch ? bahanMatch[1].trim() : "";
+
+      const langkahMatch = text.match(/Langkah(?:-langkah)?:?\s*([\s\S]*)/i);
+      const langkah = langkahMatch ? langkahMatch[1].trim() : "";
+
+      let html = "";
+      if (namaResep) html += `<h2>🍽️ ${namaResep}</h2>`;
+      if (bahan) html += `<h3>Bahan-bahan:</h3>${formatList(bahan)}`;
+      if (langkah) html += `<h3>Langkah-langkah:</h3>${formatList(langkah)}`;
+
+      return html || `<p>${text}</p>`;
+    }
 
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.classList.add("message", sender);
-      msg.textContent = text;
+
+      if (sender === "bot") {
+        msg.innerHTML = formatResep(text);
+      } else {
+        msg.textContent = text;
+      }
+
       chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -126,16 +175,10 @@
       }
     }
 
-    // tekan Enter juga bisa kirim
     input.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        sendMessage();
-      }
+      if (e.key === "Enter") sendMessage();
     });
   </script>
 
 </body>
 </html>
-
-
-
