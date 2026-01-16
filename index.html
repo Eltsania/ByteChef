@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Private Chef - ByteChef</title>
-  <link rel="icon" type="image" href="https://blogger.googleusercontent.com/img/a/AVvXsEibIjGlSt6_nB_3o4ApSkToynPuRDxuE2hQnkdZMXv0BkrMPrOZAerJ9Ywv33Ej8F6OvkKvvoMzFyTC4XK6rgfmyE6euy9geJyIsBFLg5LhUaw7Edzp1d4yLEPwa9M1Ou6gBzdfpXCcsYMITGAeECqLGRP46aYAQwUM3M0v02S76P00Q_hWJaV8WnLH">
-</head>
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/a/AVvXsEibIjGlSt6_nB_3o4ApSkToynPuRDxuE2hQnkdZMXv0BkrMPrOZAerJ9Ywv33Ej8F6OvkKvvoMzFyTC4XK6rgfmyE6euy9geJyIsBFLg5LhUaw7Edzp1d4yLEPwa9M1Ou6gBzdfpXCcsYMITGAeECqLGRP46aYAQwUM3M0v02S76P00Q_hWJaV8WnLH">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -128,24 +127,24 @@
       return `<p>${text}</p>`;
     }
 
-    function formatResep(text) {
-      // Pecah bagian berdasarkan kata kunci umum
-      const namaMatch = text.match(/(?:Resep|Nama):?\s*(.*?)(?=\n|Bahan|Langkah|$)/i);
-      const namaResep = namaMatch ? namaMatch[1].trim() : "";
+function formatResep(text) {
+  let html = text;
 
-      const bahanMatch = text.match(/Bahan(?:-bahan)?:?\s*([\s\S]*?)(?=Langkah|$)/i);
-      const bahan = bahanMatch ? bahanMatch[1].trim() : "";
+  html = html.replace(/📖 Resep:\s*\*(.*?)\*/g, "<h2>🍽️ $1</h2>");
+  html = html.replace(/📋 Bahan:/g, "<h3>Bahan-bahan:</h3>");
+  html = html.replace(/👩‍🍳 Langkah:/g, "<h3>Langkah-langkah:</h3>");
 
-      const langkahMatch = text.match(/Langkah(?:-langkah)?:?\s*([\s\S]*)/i);
-      const langkah = langkahMatch ? langkahMatch[1].trim() : "";
+  // bullet
+  html = html.replace(/• (.*?)(<br>|$)/g, "<li>$1</li>");
+  html = html.replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>");
 
-      let html = "";
-      if (namaResep) html += `<h2>🍽️ ${namaResep}</h2>`;
-      if (bahan) html += `<h3>Bahan-bahan:</h3>${formatList(bahan)}`;
-      if (langkah) html += `<h3>Langkah-langkah:</h3>${formatList(langkah)}`;
+  // nomor
+  html = html.replace(/(\d+)\. (.*?)(<br>|$)/g, "<li>$2</li>");
+  html = html.replace(/(<li>.*<\/li>)/gs, "<ol>$1</ol>");
 
-      return html || `<p>${text}</p>`;
-    }
+  return html.replace(/\n/g, "<br>");
+}
+
 
     function addMessage(text, sender) {
       const msg = document.createElement("div");
@@ -184,6 +183,7 @@
 
 </body>
 </html>
+
 
 
 
